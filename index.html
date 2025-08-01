@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Envelope - Girlfriend's Day</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+
+        .container {
+            position: relative;
+            perspective: 1000px;
+        }
+
+        .envelope {
+            width: 300px;
+            height: 200px;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .envelope:hover {
+            transform: scale(1.05);
+        }
+
+        .envelope-back {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #ff6b9d, #c44569);
+            border-radius: 8px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .envelope-flap {
+            width: 0;
+            height: 0;
+            border-left: 150px solid transparent;
+            border-right: 150px solid transparent;
+            border-bottom: 120px solid #ff8fab;
+            position: absolute;
+            top: -1px;
+            left: 0;
+            transform-origin: bottom center;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 3;
+        }
+
+        .envelope.opened .envelope-flap {
+            transform: rotateX(-180deg);
+        }
+
+        .envelope-front {
+            width: 100%;
+            height: 140px;
+            background: linear-gradient(135deg, #ff8fab, #ff6b9d);
+            position: absolute;
+            bottom: 0;
+            border-radius: 0 0 8px 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .envelope-heart {
+            width: 40px;
+            height: 40px;
+            background: #fff;
+            transform: rotate(45deg);
+            position: relative;
+            opacity: 0.8;
+        }
+
+        .envelope-heart::before,
+        .envelope-heart::after {
+            content: '';
+            width: 40px;
+            height: 40px;
+            background: #fff;
+            border-radius: 50%;
+            position: absolute;
+        }
+
+        .envelope-heart::before {
+            top: -20px;
+            left: 0;
+        }
+
+        .envelope-heart::after {
+            top: 0;
+            left: -20px;
+        }
+
+        .card {
+            width: 280px;
+            height: 180px;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 2;
+            perspective: 1000px;
+        }
+
+        .envelope.opened .card {
+            transform: translateY(-50px);
+            opacity: 1;
+            transition-delay: 0.3s;
+        }
+
+        .card-inner {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+        }
+
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .card-front {
+            background: linear-gradient(135deg, #ff6b9d, #ff8fab);
+        }
+
+        .card-back {
+            background: linear-gradient(135deg, #ff8fab, #ff6b9d);
+            transform: rotateY(180deg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .card-back-message {
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            line-height: 1.4;
+        }
+
+        .gift-card {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #000, #333);
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            color: white;
+        }
+
+        .ulta-logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #ff6b9d;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        .gift-card-content {
+            text-align: center;
+        }
+
+        .amount {
+            font-size: 48px;
+            font-weight: bold;
+            color: #fff;
+            margin: 10px 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .card-text {
+            font-size: 14px;
+            color: #ccc;
+            margin-bottom: 10px;
+        }
+
+        .card-number {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #999;
+            letter-spacing: 2px;
+        }
+
+        .sparkles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #fff;
+            border-radius: 50%;
+            opacity: 0;
+            animation: sparkle 2s infinite;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1); }
+        }
+
+        .message {
+            position: absolute;
+            top: -80px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff6b9d;
+            text-shadow: 2px 2px 4px rgba(255,255,255,0.8);
+            opacity: 0;
+            transition: all 0.8s ease;
+            white-space: nowrap;
+            z-index: 4;
+        }
+
+        .envelope.opened .message {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-20px);
+            transition-delay: 1s;
+        }
+
+        .click-instruction {
+            position: absolute;
+            bottom: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ff6b9d;
+            font-size: 16px;
+            opacity: 0.8;
+            animation: pulse 2s infinite;
+        }
+
+        .envelope.opened .click-instruction {
+            opacity: 0;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 0.4; }
+        }
+
+        .replay-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #ff6b9d;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 25px;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 107, 157, 0.3);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .replay-button:hover {
+            background: #ff8fab;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 157, 0.4);
+        }
+
+        .envelope.opened .replay-button {
+            opacity: 1;
+            transition-delay: 1.5s;
+        }
+
+        .floating-hearts {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .floating-heart {
+            position: absolute;
+            color: #ff6b9d;
+            font-size: 20px;
+            opacity: 0;
+            animation: float 3s infinite;
+        }
+
+        @keyframes float {
+            0% { 
+                opacity: 0; 
+                transform: translateY(0) rotate(0deg); 
+            }
+            10% { 
+                opacity: 1; 
+            }
+            90% { 
+                opacity: 1; 
+            }
+            100% { 
+                opacity: 0; 
+                transform: translateY(-200px) rotate(360deg); 
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="replay-button" id="replayButton">🔄 Replay</button>
+        
+        <div class="envelope" id="envelope">
+            <div class="envelope-back"></div>
+            <div class="envelope-flap"></div>
+            <div class="envelope-front">
+                <div class="envelope-heart"></div>
+            </div>
+            
+            <div class="card" id="giftCard">
+                <div class="card-inner" id="cardInner">
+                    <div class="card-front">
+                        <div class="gift-card">
+                            <div class="ulta-logo">ULTA</div>
+                            <div class="gift-card-content">
+                                <div class="amount">$50</div>
+                                <div class="card-text">GIFT CARD</div>
+                                <div class="card-number">**** **** **** 1234</div>
+                            </div>
+                            <div class="sparkles"></div>
+                        </div>
+                    </div>
+                    <div class="card-back">
+                        <div class="card-back-message">
+                            Card is emailed to you hehe! 📧<br>
+                            <small style="font-size: 14px; opacity: 0.8;">Click again to flip back</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="message">Happy Girlfriend's Day! 💕</div>
+            <div class="click-instruction">Click to open</div>
+        </div>
+        
+        <div class="floating-hearts"></div>
+    </div>
+
+    <script>
+        const envelope = document.getElementById('envelope');
+        const giftCard = document.getElementById('giftCard');
+        const cardInner = document.getElementById('cardInner');
+        const replayButton = document.getElementById('replayButton');
+        const sparklesContainer = document.querySelector('.sparkles');
+        const floatingHeartsContainer = document.querySelector('.floating-hearts');
+        let isOpened = false;
+        let heartInterval;
+
+        // Reset function
+        function resetEnvelope() {
+            envelope.classList.remove('opened');
+            giftCard.classList.remove('flipped');
+            isOpened = false;
+            
+            // Clear sparkles
+            sparklesContainer.innerHTML = '';
+            
+            // Clear floating hearts
+            floatingHeartsContainer.innerHTML = '';
+            
+            // Clear heart interval if running
+            if (heartInterval) {
+                clearInterval(heartInterval);
+                heartInterval = null;
+            }
+        }
+
+        // Create sparkles
+        function createSparkles() {
+            for (let i = 0; i < 20; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                sparkle.style.left = Math.random() * 100 + '%';
+                sparkle.style.top = Math.random() * 100 + '%';
+                sparkle.style.animationDelay = Math.random() * 2 + 's';
+                sparklesContainer.appendChild(sparkle);
+            }
+        }
+
+        // Create floating hearts
+        function createFloatingHeart() {
+            const heart = document.createElement('div');
+            heart.className = 'floating-heart';
+            heart.innerHTML = '💕';
+            heart.style.left = Math.random() * 100 + '%';
+            heart.style.animationDelay = Math.random() * 2 + 's';
+            floatingHeartsContainer.appendChild(heart);
+            
+            setTimeout(() => {
+                heart.remove();
+            }, 3000);
+        }
+
+        // Card click handler - flip the card
+        cardInner.addEventListener('click', function(e) {
+            if (isOpened) {
+                e.stopPropagation();
+                giftCard.classList.toggle('flipped');
+            }
+        });
+
+        // Replay button click handler
+        replayButton.addEventListener('click', function(e) {
+            e.stopPropagation();
+            resetEnvelope();
+        });
+
+        // Envelope click handler
+        envelope.addEventListener('click', function(e) {
+            // If the card was clicked, don't close the envelope
+            if (e.target.closest('.card-inner')) {
+                return;
+            }
+            
+            if (isOpened) {
+                // Close the envelope
+                resetEnvelope();
+            } else {
+                // Open the envelope
+                envelope.classList.add('opened');
+                isOpened = true;
+                
+                // Start sparkle animation
+                createSparkles();
+                
+                // Create floating hearts periodically
+                setTimeout(() => {
+                    heartInterval = setInterval(() => {
+                        createFloatingHeart();
+                    }, 500);
+                    
+                    // Stop creating hearts after 10 seconds
+                    setTimeout(() => {
+                        if (heartInterval) {
+                            clearInterval(heartInterval);
+                            heartInterval = null;
+                        }
+                    }, 10000);
+                }, 1000);
+            }
+        });
+
+        // Add hover effects
+        envelope.addEventListener('mouseenter', function() {
+            if (!isOpened) {
+                this.style.transform = 'scale(1.05) rotateY(5deg)';
+            }
+        });
+
+        envelope.addEventListener('mouseleave', function() {
+            if (!isOpened) {
+                this.style.transform = 'scale(1) rotateY(0deg)';
+            }
+        });
+    </script>
+</body>
+</html>
