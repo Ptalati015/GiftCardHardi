@@ -152,7 +152,7 @@
         }
 
         .card-back {
-            background: linear-gradient(135deg, #ff8fab, #ff6b9d);
+            background: white;
             transform: rotateY(180deg);
             display: flex;
             justify-content: center;
@@ -162,7 +162,7 @@
         }
 
         .card-back-message {
-            color: white;
+            color: #ff6b9d;
             font-size: 18px;
             font-weight: bold;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
@@ -380,7 +380,7 @@
             Next Page
     </a>
     <div class="container">
-
+ <button class="replay-button" id="replayButton">🔄 Replay</button>
         <div class="envelope" id="envelope">
             <div class="envelope-back"></div>
             <div class="envelope-flap"></div>
@@ -422,9 +422,10 @@
         const envelope = document.getElementById('envelope');
         const giftCard = document.getElementById('giftCard');
         const cardInner = document.getElementById('cardInner');
-        const replayButton = document.getElementById('replayButton');
         const sparklesContainer = document.querySelector('.sparkles');
         const floatingHeartsContainer = document.querySelector('.floating-hearts');
+        const replayButton = document.getElementById('replayButton');
+
         let isOpened = false;
         let heartInterval;
 
@@ -482,6 +483,7 @@
         });
 
         // Replay button click handler
+      // Replay button click handler
         replayButton.addEventListener('click', function(e) {
             e.stopPropagation();
             resetEnvelope();
